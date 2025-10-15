@@ -1,0 +1,37 @@
+# Base Node 18 avec Debian Bullseye
+FROM node:18-bullseye
+
+# Dépendances pour Puppeteer / Chromium
+RUN apt-get update && apt-get install -y \
+    chromium wget ca-certificates fonts-liberation libasound2 libatk1.0-0 \
+    libatk-bridge2.0-0 libc6 libcairo2 libdbus-1-3 libexpat1 libfontconfig1 \
+    libfreetype6 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 \
+    libgtk-3-0 libnss3 libpango-1.0-0 libx11-6 libx11-xcb1 libxcb1 \
+    libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 \
+    libxrandr2 libxrender1 libxss1 lsb-release xdg-utils
+
+# Crée le dossier app
+WORKDIR /usr/src/app
+
+# Copie les fichiers package.json et package-lock.json
+COPY package*.json ./
+RUN npm install --production
+
+# Copie le code du bot
+COPY . .
+
+# Crée le dossier sessions pour LocalAuth
+RUN mkdir -p /usr/src/app/sessions && chown -R node:node /usr/src/app/sessions
+
+# Utilise un user non-root
+USER node
+
+# Expose le port API
+EXPOSE 3001
+
+# Variable d'environnement Puppeteer
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV NODE_ENV=production
+
+# Démarre le bot
+CMD ["node", "main.js"]

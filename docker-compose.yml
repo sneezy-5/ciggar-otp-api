@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  wwebjs-bot:
+    build: .
+    container_name: wwebjs-bot
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./sessions:/usr/src/app/sessions  # persistance de session WhatsApp
+      - ./logs:/usr/src/app/logs    
+    environment:
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+      - NODE_ENV=production
+      # - API_TOKEN=${API_TOKEN:-your_token_here}

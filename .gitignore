@@ -1,0 +1,37 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Sessions WhatsApp (ne pas les partager)
+sessions/
+session.json
+
+# Logs
+logs/
+*.log
+
+# Environnement
+.env
+.env.local
+.env.production
+.env.development
+
+# Docker
+docker-compose.override.yml
+*.pid
+*.seed
+*.pid.lock
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Build / temp
+dist/
+build/
+tmp/
