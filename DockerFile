@@ -1,45 +1,52 @@
-FROM node:18-alpine
+# ---- Étape 1 : base Node.js ----
+FROM node:18-slim
 
-# Installer Chromium et les dépendances nécessaires
-RUN apk add --no-cache \
+# Installer Chromium et dépendances nécessaires à Puppeteer
+RUN apt-get update && apt-get install -y \
     chromium \
-    nss \
-    freetype \
-    harfbuzz \
+    fonts-liberation \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libatspi2.0-0 \
+    libcups2 \
+    libdrm2 \
+    libgbm1 \
+    libgtk-3-0 \
+    libnspr4 \
+    libnss3 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxrandr2 \
+    xdg-utils \
+    wget \
     ca-certificates \
-    ttf-freefont \
-    font-noto-emoji \
-    wqy-zenhei
+    && rm -rf /var/lib/apt/lists/*
 
-# Dire à Puppeteer d'utiliser le Chromium installé
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-
-# Créer le répertoire de l'application
+# Créer le répertoire de travail
 WORKDIR /usr/src/app
 
-# Copier les fichiers package
+# Copier le package.json et installer les dépendances
 COPY package*.json ./
+RUN npm install --production
 
-# Installer les dépendances
-RUN npm ci --only=production
-
-# Copier le code source
+# Copier le code de l'application
 COPY . .
 
-# Créer un utilisateur non-root
-RUN addgroup -g 1000 appuser && \
-    adduser -D -u 1000 -G appuser appuser
-
-# Créer les dossiers pour les sessions et logs
+# Créer les dossiers nécessaires
 RUN mkdir -p /usr/src/app/sessions /usr/src/app/logs && \
-    chown -R appuser:appuser /usr/src/app
+    chown -R node:node /usr/src/app && \
+    chmod -R 755 /usr/src/app
 
-# Changer vers l'utilisateur non-root
-USER appuser
+# Variables d'environnement
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV NODE_ENV=production
+ENV PORT=3001
 
-# Exposer le port
+USER node
+
 EXPOSE 3001
 
-# Démarrer l'application
-CMD ["node", "index.js"]
+CMD ["node", "main.js"]
