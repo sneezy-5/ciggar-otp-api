@@ -5,6 +5,7 @@ services:
     build: .
     container_name: wwebjs-bot
     restart: unless-stopped
+    user: "1000:1000"  # UID:GID pour correspondre à l'utilisateur local
     ports:
       - "3001:3001"
     volumes:

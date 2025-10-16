@@ -1,37 +1,45 @@
-# Base Node 18 avec Debian Bullseye
-FROM node:18-bullseye
+FROM node:18-alpine
 
-# Dépendances pour Puppeteer / Chromium
-RUN apt-get update && apt-get install -y \
-    chromium wget ca-certificates fonts-liberation libasound2 libatk1.0-0 \
-    libatk-bridge2.0-0 libc6 libcairo2 libdbus-1-3 libexpat1 libfontconfig1 \
-    libfreetype6 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 \
-    libgtk-3-0 libnss3 libpango-1.0-0 libx11-6 libx11-xcb1 libxcb1 \
-    libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 \
-    libxrandr2 libxrender1 libxss1 lsb-release xdg-utils
+# Installer Chromium et les dépendances nécessaires
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    font-noto-emoji \
+    wqy-zenhei
 
-# Crée le dossier app
+# Dire à Puppeteer d'utiliser le Chromium installé
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+# Créer le répertoire de l'application
 WORKDIR /usr/src/app
 
-# Copie les fichiers package.json et package-lock.json
+# Copier les fichiers package
 COPY package*.json ./
-RUN npm install --production
 
-# Copie le code du bot
+# Installer les dépendances
+RUN npm ci --only=production
+
+# Copier le code source
 COPY . .
 
-# Crée le dossier sessions pour LocalAuth
-RUN mkdir -p /usr/src/app/sessions && chown -R node:node /usr/src/app/sessions
+# Créer un utilisateur non-root
+RUN addgroup -g 1000 appuser && \
+    adduser -D -u 1000 -G appuser appuser
 
-# Utilise un user non-root
-USER node
+# Créer les dossiers pour les sessions et logs
+RUN mkdir -p /usr/src/app/sessions /usr/src/app/logs && \
+    chown -R appuser:appuser /usr/src/app
 
-# Expose le port API
+# Changer vers l'utilisateur non-root
+USER appuser
+
+# Exposer le port
 EXPOSE 3001
 
-# Variable d'environnement Puppeteer
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-ENV NODE_ENV=production
-
-# Démarre le bot
-CMD ["node", "main.js"]
+# Démarrer l'application
+CMD ["node", "index.js"]
