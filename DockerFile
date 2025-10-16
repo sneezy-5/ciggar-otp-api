@@ -4,6 +4,8 @@ FROM node:18-slim
 # Installer Chromium et dépendances nécessaires à Puppeteer
 RUN apt-get update && apt-get install -y \
     chromium \
+    chromium-common \
+    chromium-driver \
     fonts-liberation \
     libasound2 \
     libatk-bridge2.0-0 \
@@ -23,6 +25,7 @@ RUN apt-get update && apt-get install -y \
     xdg-utils \
     wget \
     ca-certificates \
+    && ln -s /usr/bin/chromium /usr/bin/chromium-browser \
     && rm -rf /var/lib/apt/lists/*
 
 # Créer le répertoire de travail
