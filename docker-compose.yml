@@ -1,4 +1,5 @@
 version: "3.8"
+
 services:
   wwebjs-bot:
     build: .
@@ -7,9 +8,20 @@ services:
     ports:
       - "3001:3001"
     volumes:
-      - ./sessions:/usr/src/app/sessions  # persistance de session WhatsApp
-      - ./logs:/usr/src/app/logs    
+      - ./sessions:/usr/src/app/sessions
+      - ./logs:/usr/src/app/logs
+      - /dev/shm:/dev/shm
     environment:
-      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
       - NODE_ENV=production
-      # - API_TOKEN=${API_TOKEN:-your_token_here}
+      - PORT=3001
+    shm_size: '2gb'
+    security_opt:
+      - seccomp:unconfined
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
