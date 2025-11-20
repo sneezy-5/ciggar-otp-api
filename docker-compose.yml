@@ -5,24 +5,31 @@ services:
     build: .
     container_name: wwebjs-bot
     restart: unless-stopped
-    user: "1000:1000"  # UID:GID pour correspondre à l'utilisateur local
     ports:
       - "3001:3001"
     volumes:
       - ./sessions:/usr/src/app/sessions
       - ./logs:/usr/src/app/logs
+      - wwebjs_auth:/usr/src/app/.wwebjs_auth
+      - wwebjs_cache:/usr/src/app/.wwebjs_cache
       - /dev/shm:/dev/shm
     environment:
       - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-      # - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
       - NODE_ENV=production
       - PORT=3001
     shm_size: '2gb'
     security_opt:
       - seccomp:unconfined
+    cap_add:
+      - SYS_ADMIN
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/status"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 60s
+
+volumes:
+  wwebjs_auth:
+  wwebjs_cache:

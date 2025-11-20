@@ -6,6 +6,28 @@ app.use(express.json());
 
 let clientReady = false;
 
+// const client = new Client({
+//   authStrategy: new LocalAuth({ dataPath: "./sessions" }),
+//   puppeteer: {
+//     headless: true,
+//     args: [
+//       "--no-sandbox",
+//       "--disable-setuid-sandbox",
+//       "--disable-dev-shm-usage",
+//       "--disable-accelerated-2d-canvas",
+//       "--no-first-run",
+//       "--no-zygote",
+//       "--single-process",
+//       "--disable-gpu"
+//     ],
+//   },
+//   // Forcer une version stable de WhatsApp Web
+//   webVersionCache: {
+//     type: 'remote',
+//     remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
+//   }
+// });
+
 const client = new Client({
   authStrategy: new LocalAuth({ dataPath: "./sessions" }),
   puppeteer: {
@@ -20,8 +42,8 @@ const client = new Client({
       "--single-process",
       "--disable-gpu"
     ],
+    timeout: 120000  // ← Augmenter à 2 minutes
   },
-  // Forcer une version stable de WhatsApp Web
   webVersionCache: {
     type: 'remote',
     remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
